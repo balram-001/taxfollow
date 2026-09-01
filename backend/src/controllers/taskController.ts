@@ -302,7 +302,7 @@ export const uploadFinalAcknowledgement = async (req: AuthRequest, res: Response
 
     // Auto-Send Final Acknowledgement Email to Client
    if (client.email) {
-  const frontendBaseUrl = process.env.CLIENT_BASE_URL || 'http://localhost:5173';
+  const frontendBaseUrl = process.env.CLIENT_BASE_URL || 'https://taxfollow.vercel.app';
   const trackingUrl = `${frontendBaseUrl}/track/${client.trackingToken}`;
   
   sendFinalAckEmail(

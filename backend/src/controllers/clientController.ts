@@ -38,7 +38,7 @@ export const createClient = async (req: AuthRequest, res: Response): Promise<voi
 
     // Auto-Send Welcome Email with Tracking Link and Requirements
     if (email) {
-      const frontendBaseUrl = process.env.CLIENT_BASE_URL || 'http://localhost:5173';
+      const frontendBaseUrl = process.env.CLIENT_BASE_URL || 'https://taxfollow.vercel.app';
       const trackingUrl = `${frontendBaseUrl}/track/${trackingToken}`;
 
       const allReqs = [
