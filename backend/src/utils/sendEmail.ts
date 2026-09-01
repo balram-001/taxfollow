@@ -3,29 +3,43 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Secure SMTP Transporter Configuration for Render/Production
+const emailUser = process.env.EMAIL_USER?.trim();
+// Use a Gmail App Password in production. EMAIL_PASS is retained for existing
+// deployments, while EMAIL_APP_PASSWORD is the preferred explicit name.
+const emailPassword = (process.env.EMAIL_APP_PASSWORD || process.env.EMAIL_PASS)?.replace(/\s/g, '');
+
+const getMailConfig = () => {
+  if (!emailUser || !emailPassword) {
+    throw new Error('Email is not configured. Set EMAIL_USER and EMAIL_APP_PASSWORD in Render.');
+  }
+
+  return { user: emailUser, pass: emailPassword };
+};
+
+// Gmail supports SSL SMTP on port 465. Its App Password is required; a normal
+// Gmail sign-in password will be rejected by Gmail.
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
   secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  connectionTimeout: 10000, // 10-second timeout to prevent infinite hanging
-  tls: {
-    rejectUnauthorized: false,
-  },
+  auth: { user: emailUser || '', pass: emailPassword || '' },
+  connectionTimeout: 15_000,
+  greetingTimeout: 15_000,
+  socketTimeout: 20_000,
 });
+
+export const verifyEmailConnection = async (): Promise<void> => {
+  getMailConfig();
+  await transporter.verify();
+};
 
 // 1. Password Reset / Registration OTP Email
 export const sendOtpEmail = async (toEmail: string, otp: string): Promise<void> => {
   if (!toEmail) return;
-
-  console.log(`\n============================\n🔐 OTP for ${toEmail}: ${otp}\n============================\n`);
+  getMailConfig();
 
   const mailOptions = {
-    from: `"TaxFollow Security" <${process.env.EMAIL_USER}>`,
+    from: `"TaxFollow Security" <${emailUser}>`,
     to: toEmail,
     subject: `Your TaxFollow Verification OTP`,
     html: `
@@ -40,8 +54,13 @@ export const sendOtpEmail = async (toEmail: string, otp: string): Promise<void> 
     `,
   };
 
-  await transporter.sendMail(mailOptions);
-  console.log(`OTP email sent successfully to ${toEmail}`);
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`OTP email accepted by Gmail for ${toEmail}. Message ID: ${info.messageId}`);
+  } catch (error: any) {
+    console.error('OTP email delivery failed:', error?.message || error);
+    throw new Error('Unable to send the OTP email. Please try again later.');
+  }
 };
 
 // 2. Client Creation Alert Mail

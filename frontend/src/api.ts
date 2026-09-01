@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { API_BASE_URL } from './config';
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://taxfollow-backend.onrender.com/api',
+  baseURL: API_BASE_URL,
 });
 
 API.interceptors.request.use((req) => {

@@ -4,6 +4,7 @@ import API from './api';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
+import { BACKEND_URL } from './config';
 import { 
   Shield, Plus, Search, ExternalLink, X, LogOut, 
   MessageCircle, Copy, Check, Loader2, Upload, FileText, SlidersHorizontal,
@@ -485,7 +486,7 @@ function Dashboard() {
                     </div>
                     <button
                       onClick={() => {
-                        setPreviewDocUrl(`https://taxfollow-backend.onrender.com${ackFileItem.fileUrl}`);
+                        setPreviewDocUrl(`${BACKEND_URL}${ackFileItem.fileUrl}`);
                         setPreviewDocName(ackFileItem.originalFileName || 'Deliverable');
                       }}
                       className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold shrink-0 cursor-pointer"
@@ -632,7 +633,7 @@ function Dashboard() {
                               </div>
                               <button
                                 onClick={() => {
-                                  setPreviewDocUrl(`https://taxfollow-backend.onrender.com${fileObj.fileUrl}`);
+                                  setPreviewDocUrl(`${BACKEND_URL}${fileObj.fileUrl}`);
                                   setPreviewDocName(fileObj.originalFileName || 'Document');
                                 }}
                                 className="px-2.5 py-1 bg-emerald-600 text-white rounded text-xs font-semibold shrink-0 cursor-pointer shadow-xs"
@@ -1069,7 +1070,7 @@ const allRequirementSlots = [
       <p className="text-xs text-emerald-100">{bannerDesc}</p>
       <div className="flex flex-wrap gap-2 pt-1">
         <a
-          href={`https://taxfollow-backend.onrender.com${ackFileItem.fileUrl}`}
+          href={`${BACKEND_URL}${ackFileItem.fileUrl}`}
           download={ackFileItem.originalFileName || 'Final_Document.pdf'}
           target="_blank"
           rel="noreferrer"
@@ -1255,7 +1256,7 @@ const allRequirementSlots = [
 
       {/* Client Document Viewer Modal */}
       {viewDocOpen && previewTargetDoc?.fileUrl && (() => {
-        const fileUrl = `https://taxfollow-backend.onrender.com${previewTargetDoc.fileUrl}`;
+        const fileUrl = `${BACKEND_URL}${previewTargetDoc.fileUrl}`;
         const rawName = previewTargetDoc.originalFileName || previewTargetDoc.fileUrl;
         const ext = rawName.split('.').pop()?.toLowerCase() || '';
         const isImage = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(ext);
