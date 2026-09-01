@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import dns from 'node:dns';
 
 dotenv.config();
 
@@ -23,10 +24,15 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: { user: emailUser || '', pass: emailPassword || '' },
+  // Render instances do not provide an IPv6 route. Resolve Gmail's SMTP host
+  // to IPv4 explicitly instead of letting Node choose an unreachable IPv6 IP.
+  lookup: ((hostname: string, _options: unknown, callback: unknown) => {
+    dns.lookup(hostname, { family: 4 }, callback as any);
+  }) as any,
   connectionTimeout: 15_000,
   greetingTimeout: 15_000,
   socketTimeout: 20_000,
-});
+} as any);
 
 export const verifyEmailConnection = async (): Promise<void> => {
   getMailConfig();
