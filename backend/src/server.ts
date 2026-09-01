@@ -28,10 +28,16 @@ app.use('/api/auth', authRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/tasks', taskRoutes);
 
+// Root route (Fixes UptimeRobot 404)
+app.get('/', (_req, res) => {
+  res.status(200).send('TaxFollow Backend is Live & Running! 🚀');
+});
+
+// Health check route
 app.get('/health', (_req, res) => {
   res.json({ status: 'OK', message: 'TaxFollow Backend is running!' });
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 TaxFollow Server running on http://localhost:${PORT}`);
+  console.log(`🚀 TaxFollow Server running on port ${PORT}`);
 });
