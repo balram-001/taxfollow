@@ -485,7 +485,7 @@ function Dashboard() {
                     </div>
                     <button
                       onClick={() => {
-                        setPreviewDocUrl(`http://localhost:5000${ackFileItem.fileUrl}`);
+                        setPreviewDocUrl(`https://taxfollow-backend.onrender.com${ackFileItem.fileUrl}`);
                         setPreviewDocName(ackFileItem.originalFileName || 'Deliverable');
                       }}
                       className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold shrink-0 cursor-pointer"
@@ -632,7 +632,7 @@ function Dashboard() {
                               </div>
                               <button
                                 onClick={() => {
-                                  setPreviewDocUrl(`http://localhost:5000${fileObj.fileUrl}`);
+                                  setPreviewDocUrl(`https://taxfollow-backend.onrender.com${fileObj.fileUrl}`);
                                   setPreviewDocName(fileObj.originalFileName || 'Document');
                                 }}
                                 className="px-2.5 py-1 bg-emerald-600 text-white rounded text-xs font-semibold shrink-0 cursor-pointer shadow-xs"
@@ -1069,7 +1069,7 @@ const allRequirementSlots = [
       <p className="text-xs text-emerald-100">{bannerDesc}</p>
       <div className="flex flex-wrap gap-2 pt-1">
         <a
-          href={`http://localhost:5000${ackFileItem.fileUrl}`}
+          href={`https://taxfollow-backend.onrender.com${ackFileItem.fileUrl}`}
           download={ackFileItem.originalFileName || 'Final_Document.pdf'}
           target="_blank"
           rel="noreferrer"
@@ -1255,7 +1255,7 @@ const allRequirementSlots = [
 
       {/* Client Document Viewer Modal */}
       {viewDocOpen && previewTargetDoc?.fileUrl && (() => {
-        const fileUrl = `http://localhost:5000${previewTargetDoc.fileUrl}`;
+        const fileUrl = `https://taxfollow-backend.onrender.com${previewTargetDoc.fileUrl}`;
         const rawName = previewTargetDoc.originalFileName || previewTargetDoc.fileUrl;
         const ext = rawName.split('.').pop()?.toLowerCase() || '';
         const isImage = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(ext);
