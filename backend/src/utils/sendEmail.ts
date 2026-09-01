@@ -17,25 +17,34 @@ const getMailConfig = () => {
   return { user: emailUser, pass: emailPassword };
 };
 
-// Gmail supports SSL SMTP on port 465. Its App Password is required; a normal
-// Gmail sign-in password will be rejected by Gmail.
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
-  auth: { user: emailUser || '', pass: emailPassword || '' },
-  // Render instances do not provide an IPv6 route. Resolve Gmail's SMTP host
-  // to IPv4 explicitly instead of letting Node choose an unreachable IPv6 IP.
-  lookup: ((hostname: string, _options: unknown, callback: unknown) => {
-    dns.lookup(hostname, { family: 4 }, callback as any);
-  }) as any,
-  connectionTimeout: 15_000,
-  greetingTimeout: 15_000,
-  socketTimeout: 20_000,
-} as any);
+let transporterPromise: Promise<nodemailer.Transporter> | undefined;
+
+const getTransporter = () => {
+  if (!transporterPromise) {
+    transporterPromise = dns.promises.resolve4('smtp.gmail.com').then(([gmailIpv4]) => {
+      if (!gmailIpv4) throw new Error('Could not resolve Gmail SMTP over IPv4.');
+
+      console.log(`Connecting to Gmail SMTP over IPv4: ${gmailIpv4}`);
+      return nodemailer.createTransport({
+        // Render has no IPv6 egress. Connecting to the resolved IPv4 directly
+        // avoids Nodemailer resolving smtp.gmail.com back to an IPv6 address.
+        host: gmailIpv4,
+        port: 587,
+        secure: false,
+        auth: { user: emailUser || '', pass: emailPassword || '' },
+        tls: { servername: 'smtp.gmail.com' },
+        connectionTimeout: 15_000,
+        greetingTimeout: 15_000,
+        socketTimeout: 20_000,
+      });
+    });
+  }
+  return transporterPromise;
+};
 
 export const verifyEmailConnection = async (): Promise<void> => {
   getMailConfig();
+  const transporter = await getTransporter();
   await transporter.verify();
 };
 
@@ -43,6 +52,7 @@ export const verifyEmailConnection = async (): Promise<void> => {
 export const sendOtpEmail = async (toEmail: string, otp: string): Promise<void> => {
   if (!toEmail) return;
   getMailConfig();
+  const transporter = await getTransporter();
 
   const mailOptions = {
     from: `"TaxFollow Security" <${emailUser}>`,
@@ -78,6 +88,7 @@ export const sendClientWelcomeEmail = async (
   requiredServices: string[]
 ): Promise<void> => {
   if (!toEmail) return;
+  const transporter = await getTransporter();
 
   const docsListHtml = requiredServices.length > 0
     ? `<ul>${requiredServices.map((s) => `<li><strong>${s}</strong></li>`).join('')}</ul>`
@@ -131,6 +142,7 @@ export const sendFinalAckEmail = async (
   serviceType?: string
 ): Promise<void> => {
   if (!toEmail) return;
+  const transporter = await getTransporter();
 
   const isGST = serviceType?.includes('GST');
   const isTDS = serviceType?.includes('TDS');
