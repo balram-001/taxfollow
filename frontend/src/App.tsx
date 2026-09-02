@@ -208,14 +208,19 @@ function Dashboard() {
 
     setUploadingAck(true);
     try {
-      await API.post(`/tasks/ca-upload-ack/${activeClient._id}`, data, {
+      const response = await API.post(`/tasks/ca-upload-ack/${activeClient._id}`, data, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       showToast('Final ITR-V acknowledgement uploaded successfully.', 'success');
       setAckFiles([]);
       setIsReplacingAck(false);
-      const res = await API.get(`/tasks/public/${activeClient.trackingToken}`);
-      setClientTasks(res.data.tasks || []);
+      const savedTask = response.data.task;
+      setClientTasks((current) => {
+        const remaining = current
+          .filter((task) => task._id !== savedTask._id)
+          .map((task) => ({ ...task, status: 'Completed' }));
+        return [...remaining, savedTask];
+      });
     } catch (err: any) {
       showToast(err.response?.data?.message || 'We could not upload the acknowledgement. Please try again.', 'error');
     } finally {

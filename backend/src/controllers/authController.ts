@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { User } from '../models/User';
 import { sendOtpEmail } from '../utils/sendEmail';
 
@@ -20,7 +21,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = crypto.randomInt(100000, 1_000_000).toString();
     const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     let user = existingUser;
@@ -69,7 +70,7 @@ export const verifyOtp = async (req: Request, res: Response): Promise<void> => {
     user.otpExpiresAt = undefined;
     await user.save();
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, { expiresIn: '7d' });
     res.status(200).json({
       message: 'Account verified successfully!',
       token,
@@ -102,7 +103,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, { expiresIn: '7d' });
     res.status(200).json({
       message: 'Login successful',
       token,
@@ -128,7 +129,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = crypto.randomInt(100000, 1_000_000).toString();
     user.verificationOtp = otp;
     user.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
     await user.save();
@@ -165,7 +166,7 @@ export const verifyResetOtp = async (req: Request, res: Response): Promise<void>
     user.isVerified = true;
     await user.save();
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, { expiresIn: '7d' });
 
     res.status(200).json({
       message: 'OTP verified successfully!',

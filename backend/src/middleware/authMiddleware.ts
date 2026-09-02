@@ -15,7 +15,7 @@ export const protect = (req: AuthRequest, res: Response, next: NextFunction): vo
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
       token = req.headers.authorization.split(' ')[1];
-      const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret');
+      const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
       
       // Har case ko handle karne ke liye (id, _id, ya userId)
       const userId = decoded.id || decoded._id || decoded.userId;
