@@ -77,7 +77,9 @@ export const sendFinalAckEmail = async (
   clientName: string,
   panNumber: string,
   trackingUrl: string,
-  serviceType?: string
+  serviceType?: string,
+  downloadUrl?: string,
+  fileName?: string
 ) => {
   if (!toEmail) return;
 
@@ -104,14 +106,16 @@ export const sendFinalAckEmail = async (
         </p>
 
         <p style="color: #475569; font-size: 14px;">
-          Aapki official <strong>${docName}</strong> portal par download ke liye uplabdh hai:
+          Aapki official <strong>${docName}</strong> is email ke saath attach ki gayi hai. Aap ise neeche diye button se bhi direct download kar sakte hain:
         </p>
 
         <div style="text-align: center; margin: 25px 0;">
-          <a href="${trackingUrl}" style="background-color: #059669; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
+          <a href="${downloadUrl || trackingUrl}" style="background-color: #059669; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
             Download ${docName}
           </a>
         </div>
+
+        <p style="color: #64748b; font-size: 12px;">Aapka client portal dekhne ke liye: <a href="${trackingUrl}" style="color: #059669;">Open TaxFollow Portal</a></p>
 
         <p style="color: #64748b; font-size: 12px;">
           PAN: <strong>${panNumber}</strong>
@@ -120,7 +124,13 @@ export const sendFinalAckEmail = async (
     `;
 
   try {
-    await sendTransactionalEmail(toEmail, `${title} (${panNumber})`, html, 'TaxFollow CA Portal');
+    await sendTransactionalEmail(
+      toEmail,
+      `${title} (${panNumber})`,
+      html,
+      'TaxFollow CA Portal',
+      downloadUrl && fileName ? { url: downloadUrl, name: fileName } : undefined
+    );
     console.log(`Final Ack email sent to ${toEmail}`);
   } catch (err) {
     console.error('Failed to send final ack email:', err);

@@ -1073,10 +1073,8 @@ const allRequirementSlots = [
       <p className="text-xs text-emerald-100">{bannerDesc}</p>
       <div className="flex flex-wrap gap-2 pt-1">
         <a
-          href={`${BACKEND_URL}${ackFileItem.fileUrl}`}
+          href={`${BACKEND_URL}/api/tasks/download/${token}/${finalAckTask._id}/0`}
           download={ackFileItem.originalFileName || 'Final_Document.pdf'}
-          target="_blank"
-          rel="noreferrer"
           className="inline-flex items-center gap-2 px-4 py-2 bg-white text-emerald-800 font-bold text-xs rounded-xl shadow-sm hover:bg-emerald-50 transition cursor-pointer"
         >
           <Download size={15} /> {btnLabel}

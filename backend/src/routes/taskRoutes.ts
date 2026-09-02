@@ -7,6 +7,7 @@ import {
   deleteClientDocumentFile,
   uploadFinalAcknowledgement,
   updateTaskStatus,
+  downloadClientFile,
 } from '../controllers/taskController';
 import { protect } from '../middleware/authMiddleware';
 
@@ -28,6 +29,7 @@ const upload = multer({ storage });
 router.get('/public/:token', getPublicTasks);
 router.post('/upload/:token', upload.array('files', 10), uploadClientDocument);
 router.delete('/upload/:token/file/:taskId/:fileIndex', deleteClientDocumentFile);
+router.get('/download/:token/:taskId/:fileIndex', downloadClientFile);
 
 // CA Dashboard Routes
 router.post('/ca-upload-ack/:clientId', protect, upload.single('file'), uploadFinalAcknowledgement);

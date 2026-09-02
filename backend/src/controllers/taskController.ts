@@ -301,18 +301,22 @@ export const uploadFinalAcknowledgement = async (req: AuthRequest, res: Response
     );
 
     // Auto-Send Final Acknowledgement Email to Client
-   if (client.email) {
-  const frontendBaseUrl = process.env.CLIENT_BASE_URL || 'https://taxfollow.vercel.app';
-  const trackingUrl = `${frontendBaseUrl}/track/${client.trackingToken}`;
-  
-  sendFinalAckEmail(
-    client.email,
-    client.name,
-    client.panNumber,
-    trackingUrl,
-    client.serviceType
-  ).catch((err) => console.error('Background final ack email error:', err));
-}
+    if (client.email) {
+      const frontendBaseUrl = process.env.CLIENT_BASE_URL || 'https://taxfollow.vercel.app';
+      const backendBaseUrl = process.env.PUBLIC_BACKEND_URL || 'https://taxfollow-backend.onrender.com';
+      const trackingUrl = `${frontendBaseUrl}/track/${client.trackingToken}`;
+      const downloadUrl = `${backendBaseUrl}/api/tasks/download/${client.trackingToken}/${ackTask._id}/0`;
+
+      sendFinalAckEmail(
+        client.email,
+        client.name,
+        client.panNumber,
+        trackingUrl,
+        client.serviceType,
+        downloadUrl,
+        file.originalname
+      ).catch((err) => console.error('Background final ack email error:', err));
+    }
 
     res.status(200).json({ message: 'ITR-V uploaded and all stages completed', task: ackTask });
   } catch (error: any) {
@@ -340,5 +344,36 @@ export const updateTaskStatus = async (req: AuthRequest, res: Response): Promise
     res.status(200).json({ message: 'Task status updated successfully', task });
   } catch (error: any) {
     res.status(500).json({ message: 'Failed to update task status', error: error.message });
+  }
+};
+
+// Public download link for a final document. The unguessable client tracking
+// token is required, and the response always forces a file download.
+export const downloadClientFile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { token, taskId, fileIndex } = req.params;
+    const index = Number(fileIndex);
+    if (!Number.isInteger(index) || index < 0) {
+      res.status(400).json({ message: 'This document link is invalid.' });
+      return;
+    }
+
+    const task = await DocumentTask.findOne({ _id: taskId, token });
+    const file = task?.files?.[index];
+    if (!file) {
+      res.status(404).json({ message: 'This document is no longer available.' });
+      return;
+    }
+
+    const storedFileName = path.basename(file.fileUrl);
+    const absolutePath = path.resolve(process.cwd(), 'uploads', storedFileName);
+    if (!fs.existsSync(absolutePath)) {
+      res.status(404).json({ message: 'This document is no longer available.' });
+      return;
+    }
+
+    res.download(absolutePath, file.originalFileName || storedFileName);
+  } catch (error) {
+    res.status(404).json({ message: 'This document link is invalid or has expired.' });
   }
 };
