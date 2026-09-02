@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useParams, Navigate, useNavigate } from 'react-router-dom';
 import API from './api';
 import Login from './pages/Login';
@@ -38,6 +38,7 @@ function Dashboard() {
   const [loadingTasks, setLoadingTasks] = useState(false);
   const [ackFiles, setAckFiles] = useState<File[]>([]);
   const [uploadingAck, setUploadingAck] = useState(false);
+  const ackUploadInFlight = useRef(false);
   const [isReplacingAck, setIsReplacingAck] = useState(false);
 
   // Side Drawer Preview State
@@ -199,7 +200,8 @@ function Dashboard() {
 
   const handleUploadAck = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (ackFiles.length === 0 || !activeClient) return;
+    if (ackUploadInFlight.current || ackFiles.length === 0 || !activeClient) return;
+    ackUploadInFlight.current = true;
 
     const data = new FormData();
     ackFiles.forEach((file) => data.append('files', file));
@@ -218,6 +220,7 @@ function Dashboard() {
       showToast(err.response?.data?.message || 'We could not upload the acknowledgement. Please try again.', 'error');
     } finally {
       setUploadingAck(false);
+      ackUploadInFlight.current = false;
     }
   };
 

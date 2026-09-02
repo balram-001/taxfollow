@@ -279,12 +279,11 @@ export const uploadFinalAcknowledgement = async (req: AuthRequest, res: Response
       clientId: client._id,
       title: 'Acknowledgement Generated',
     });
-    // A database record can survive a Render restart while its local upload is
-    // gone. Treat that case as a fresh delivery, not an "Updated" delivery.
-    const isReplacement = Boolean(ackTask?.files?.some((existingFile) => {
-      const storedFileName = path.basename(existingFile.fileUrl);
-      return fs.existsSync(path.resolve(process.cwd(), 'uploads', storedFileName));
-    }));
+    // Delivery state belongs in MongoDB, not Render's temporary uploads folder.
+    // Legacy tasks with a previous file are treated as an existing delivery.
+    const isReplacement = Boolean(
+      (ackTask?.finalDeliveryVersion || 0) > 0 || ackTask?.files?.length
+    );
 
     if (!ackTask) {
       ackTask = await DocumentTask.create({
@@ -297,10 +296,12 @@ export const uploadFinalAcknowledgement = async (req: AuthRequest, res: Response
         status: 'Completed',
         remarks: 'Final ITR-V Generated & Ready for Download',
         files: uploadedFiles,
+        finalDeliveryVersion: 1,
       });
     } else {
       ackTask.status = 'Completed';
       ackTask.files = uploadedFiles;
+      ackTask.finalDeliveryVersion = (ackTask.finalDeliveryVersion || 0) + 1;
       await ackTask.save();
     }
 
@@ -334,6 +335,7 @@ export const uploadFinalAcknowledgement = async (req: AuthRequest, res: Response
             attachments,
             isReplacement
           );
+          console.log(`Final delivery email v${ackTask.finalDeliveryVersion} sent for client ${client._id}.`);
         } catch (emailError) {
           console.error('Background final acknowledgement email error:', emailError);
         }

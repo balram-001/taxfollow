@@ -16,6 +16,7 @@ export interface IDocumentTask extends Document {
   status: 'Pending' | 'In Progress' | 'Completed' | 'Uploaded';
   remarks?: string;
   files: IUploadedFile[]; // Multiple files array
+  finalDeliveryVersion?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,6 +35,9 @@ const DocumentTaskSchema: Schema = new Schema(
       default: 'Pending',
     },
     remarks: { type: String, default: '' },
+    // Counts final-document deliveries. This persists across Render restarts,
+    // so the first delivery is always normal and later ones are always updates.
+    finalDeliveryVersion: { type: Number, default: 0 },
     files: [
       {
         fileUrl: { type: String, required: true },
