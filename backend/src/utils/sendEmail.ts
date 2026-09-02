@@ -33,7 +33,10 @@ export const sendTransactionalEmail = async (
     },
     body: JSON.stringify({
       sender: { email: senderEmail, name: senderName },
-      to: [{ email: toEmail }],
+      // These are transactional service emails. Do not track a client's opens
+      // or clicks, which also prevents Brevo's tracking redirect from wrapping
+      // the document-download and portal links when consent mode is enabled.
+      to: [{ email: toEmail, contactPixelTrackingConsent: false }],
       subject,
       htmlContent,
       ...(attachments?.length ? { attachment: attachments } : {}),
