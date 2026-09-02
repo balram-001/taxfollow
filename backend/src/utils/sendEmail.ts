@@ -3,8 +3,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const emailUser = process.env.EMAIL_USER?.trim();
-// Use a Gmail App Password in production. EMAIL_PASS is retained for existing
-// deployments, while EMAIL_APP_PASSWORD is the preferred explicit name.
 const brevoApiKey = process.env.BREVO_API_KEY?.trim();
 
 const getEmailConfig = () => {
