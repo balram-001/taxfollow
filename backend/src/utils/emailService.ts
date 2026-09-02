@@ -79,7 +79,8 @@ export const sendFinalAckEmail = async (
   trackingUrl: string,
   serviceType?: string,
   downloadUrl?: string,
-  attachments?: { name: string; content: string }[]
+  attachments?: { name: string; content: string }[],
+  isReplacement = false
 ) => {
   if (!toEmail) return;
 
@@ -97,12 +98,13 @@ export const sendFinalAckEmail = async (
     : isTDS 
     ? 'TDS Filing Receipt' 
     : 'ITR-V Acknowledgement Receipt';
+  const emailTitle = isReplacement ? `${docName} Updated` : title;
 
   const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
-        <h2 style="color: #059669; margin-bottom: 8px;">${title}</h2>
+        <h2 style="color: #059669; margin-bottom: 8px;">${emailTitle}</h2>
         <p style="color: #475569; font-size: 14px;">
-          Namaste ${clientName}, aapka work successfully complete kar diya gaya hai.
+          Namaste ${clientName}, ${isReplacement ? 'aapka updated final document upload kar diya gaya hai.' : 'aapka work successfully complete kar diya gaya hai.'}
         </p>
 
         <p style="color: #475569; font-size: 14px;">
@@ -126,7 +128,7 @@ export const sendFinalAckEmail = async (
   try {
     await sendTransactionalEmail(
       toEmail,
-      `${title} (${panNumber})`,
+      `${emailTitle} (${panNumber}) - ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`,
       html,
       'TaxFollow CA Portal',
       attachments

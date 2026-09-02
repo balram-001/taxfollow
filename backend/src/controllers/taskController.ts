@@ -279,6 +279,7 @@ export const uploadFinalAcknowledgement = async (req: AuthRequest, res: Response
       clientId: client._id,
       title: 'Acknowledgement Generated',
     });
+    const isReplacement = Boolean(ackTask);
 
     if (!ackTask) {
       ackTask = await DocumentTask.create({
@@ -324,7 +325,8 @@ export const uploadFinalAcknowledgement = async (req: AuthRequest, res: Response
         trackingUrl,
         client.serviceType,
         downloadUrl,
-        attachments
+        attachments,
+        isReplacement
       );
     }
 
