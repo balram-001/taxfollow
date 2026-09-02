@@ -67,8 +67,15 @@ function Dashboard() {
     try {
       const res = await API.get('/clients');
       setClients(res.data || []);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching clients:', err);
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        showToast('Your login session has expired. Please sign in again.', 'error');
+      } else {
+        showToast(err.response?.data?.message || 'We could not load your clients. Please refresh and try again.', 'error');
+      }
     }
   };
 
@@ -408,6 +415,38 @@ function Dashboard() {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile client cards: the desktop table is intentionally hidden below md. */}
+      <div className="md:hidden space-y-3">
+        {filteredClients.length === 0 ? (
+          <div className="bg-white border border-slate-200 rounded-xl p-7 text-center text-sm text-slate-500">
+            No clients found. Tap <strong>Add New Client</strong> to get started.
+          </div>
+        ) : (
+          filteredClients.map((client) => (
+            <div key={client._id} className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-slate-900 truncate">{client.name}</h3>
+                  <p className="mt-0.5 text-xs text-slate-500">{client.phone || client.whatsappNumber || client.email || 'No contact details'}</p>
+                </div>
+                <span className="font-mono text-[11px] font-bold text-emerald-700">{client.panNumber}</span>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {(client.serviceType ? client.serviceType.split(', ').filter(Boolean) : []).map((service: string) => (
+                  <span key={service} className="rounded-md border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-600">{service}</span>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
+                <button onClick={() => openWorkflowModal(client)} className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700">Workflow</button>
+                <button onClick={() => openDrawerPreview(client)} className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white">View Client</button>
+                <button onClick={() => sendWhatsAppMessage(client)} className="rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-700">WhatsApp</button>
+                <Link to={`/track/${client.trackingToken}`} target="_blank" rel="noreferrer" className="rounded-lg border border-slate-200 px-3 py-2 text-center text-xs font-semibold text-slate-700">Client Portal</Link>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Delete Client Confirmation Modal */}

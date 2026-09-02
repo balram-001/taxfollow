@@ -279,7 +279,12 @@ export const uploadFinalAcknowledgement = async (req: AuthRequest, res: Response
       clientId: client._id,
       title: 'Acknowledgement Generated',
     });
-    const isReplacement = Boolean(ackTask);
+    // A database record can survive a Render restart while its local upload is
+    // gone. Treat that case as a fresh delivery, not an "Updated" delivery.
+    const isReplacement = Boolean(ackTask?.files?.some((existingFile) => {
+      const storedFileName = path.basename(existingFile.fileUrl);
+      return fs.existsSync(path.resolve(process.cwd(), 'uploads', storedFileName));
+    }));
 
     if (!ackTask) {
       ackTask = await DocumentTask.create({
