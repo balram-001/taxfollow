@@ -137,8 +137,21 @@ export const sendFinalAckEmail = async (
       attachments
     );
     console.log(`Final Ack email sent to ${toEmail}`);
-  } catch (err) {
-    console.error('Failed to send final ack email:', err);
-    throw err;
+  } catch (attachmentError) {
+    // Large or unsupported attachments can be rejected by an email provider.
+    // Still send the completion/update notice so the client never misses it.
+    console.error('Final document attachment could not be sent; sending notification without attachment:', attachmentError);
+    try {
+      await sendTransactionalEmail(
+        toEmail,
+        `${emailTitle} (${panNumber}) - ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`,
+        html,
+        'TaxFollow CA Portal'
+      );
+      console.log(`Final Ack fallback notification sent to ${toEmail}`);
+    } catch (notificationError) {
+      console.error('Failed to send final acknowledgement notification:', notificationError);
+      throw notificationError;
+    }
   }
 };
