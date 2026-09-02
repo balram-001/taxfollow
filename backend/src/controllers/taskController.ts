@@ -306,16 +306,20 @@ export const uploadFinalAcknowledgement = async (req: AuthRequest, res: Response
       const backendBaseUrl = process.env.PUBLIC_BACKEND_URL || 'https://taxfollow-backend.onrender.com';
       const trackingUrl = `${frontendBaseUrl}/track/${client.trackingToken}`;
       const downloadUrl = `${backendBaseUrl}/api/tasks/download/${client.trackingToken}/${ackTask._id}/0`;
+      const attachmentContent = fs.readFileSync(file.path).toString('base64');
 
-      sendFinalAckEmail(
+      // Await sending so every replacement creates a fresh notification. The
+      // actual file content is attached instead of relying on Brevo fetching a URL.
+      await sendFinalAckEmail(
         client.email,
         client.name,
         client.panNumber,
         trackingUrl,
         client.serviceType,
         downloadUrl,
-        file.originalname
-      ).catch((err) => console.error('Background final ack email error:', err));
+        file.originalname,
+        attachmentContent
+      );
     }
 
     res.status(200).json({ message: 'ITR-V uploaded and all stages completed', task: ackTask });
