@@ -108,16 +108,19 @@ export const sendFinalAckEmail = async (
         </p>
 
         <p style="color: #475569; font-size: 14px;">
-          Aapki official <strong>${docName}</strong> is email ke saath attach ki gayi hai. Aap ise neeche diye button se bhi direct download kar sakte hain:
+          Aapki official <strong>${docName}</strong> is email ke saath attach ki gayi hai. Aap ise email attachment se seedha download kar sakte hain.
         </p>
 
         <div style="text-align: center; margin: 25px 0;">
-          <a href="${downloadUrl || trackingUrl}" style="background-color: #059669; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
+          <a href="${downloadUrl || trackingUrl}" style="background-color: #059669; color: #ffffff; padding: 12px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block; margin: 4px;">
             Download ${docName}
+          </a>
+          <a href="${trackingUrl}" style="background-color: #ffffff; color: #047857; border: 1px solid #059669; padding: 11px 20px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block; margin: 4px;">
+            Track Your Filing
           </a>
         </div>
 
-        <p style="color: #64748b; font-size: 12px;">Aapka client portal dekhne ke liye: <a href="${trackingUrl}" style="color: #059669;">Open TaxFollow Portal</a></p>
+        <p style="color: #64748b; font-size: 12px;">Agar button click na ho, client portal open karein: <a href="${trackingUrl}" style="color: #059669;">${trackingUrl}</a></p>
 
         <p style="color: #64748b; font-size: 12px;">
           PAN: <strong>${panNumber}</strong>
