@@ -7,7 +7,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { connectDB } from './config/db';
-import { verifyEmailConnection } from './utils/sendEmail';
+import { isEmailConfigured } from './utils/sendEmail';
 
 import authRoutes from './routes/authRoutes';
 import clientRoutes from './routes/clientRoutes';
@@ -38,10 +38,7 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 connectDB();
-
-verifyEmailConnection()
-  .then(() => console.log('Email SMTP connection verified.'))
-  .catch((error: any) => console.error(`Email SMTP is not ready: ${error.message}`));
+console.log(isEmailConfigured() ? 'Brevo email API configured.' : 'Brevo email API is not configured.');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/clients', clientRoutes);

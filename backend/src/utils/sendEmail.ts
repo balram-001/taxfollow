@@ -1,64 +1,66 @@
-import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import dns from 'node:dns';
 
 dotenv.config();
 
 const emailUser = process.env.EMAIL_USER?.trim();
 // Use a Gmail App Password in production. EMAIL_PASS is retained for existing
 // deployments, while EMAIL_APP_PASSWORD is the preferred explicit name.
-const emailPassword = (process.env.EMAIL_APP_PASSWORD || process.env.EMAIL_PASS)?.replace(/\s/g, '');
+const brevoApiKey = process.env.BREVO_API_KEY?.trim();
 
-const getMailConfig = () => {
-  if (!emailUser || !emailPassword) {
-    throw new Error('Email is not configured. Set EMAIL_USER and EMAIL_APP_PASSWORD in Render.');
+const getEmailConfig = () => {
+  if (!emailUser || !brevoApiKey) {
+    throw new Error('Email is not configured. Set EMAIL_USER and BREVO_API_KEY in Render.');
   }
 
-  return { user: emailUser, pass: emailPassword };
+  return { senderEmail: emailUser, apiKey: brevoApiKey };
 };
 
-let transporterPromise: Promise<nodemailer.Transporter> | undefined;
+export const isEmailConfigured = () => Boolean(emailUser && brevoApiKey);
 
-const getTransporter = () => {
-  if (!transporterPromise) {
-    transporterPromise = dns.promises.resolve4('smtp.gmail.com').then(([gmailIpv4]) => {
-      if (!gmailIpv4) throw new Error('Could not resolve Gmail SMTP over IPv4.');
+export const sendTransactionalEmail = async (
+  toEmail: string,
+  subject: string,
+  htmlContent: string,
+  senderName: string
+): Promise<void> => {
+  const { senderEmail, apiKey } = getEmailConfig();
 
-      console.log(`Connecting to Gmail SMTP over IPv4: ${gmailIpv4}`);
-      return nodemailer.createTransport({
-        // Render has no IPv6 egress. Connecting to the resolved IPv4 directly
-        // avoids Nodemailer resolving smtp.gmail.com back to an IPv6 address.
-        host: gmailIpv4,
-        port: 587,
-        secure: false,
-        auth: { user: emailUser || '', pass: emailPassword || '' },
-        tls: { servername: 'smtp.gmail.com' },
-        connectionTimeout: 15_000,
-        greetingTimeout: 15_000,
-        socketTimeout: 20_000,
-      });
-    });
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'api-key': apiKey,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      sender: { email: senderEmail, name: senderName },
+      to: [{ email: toEmail }],
+      subject,
+      htmlContent,
+    }),
+  });
+
+  const responseBody = await response.text();
+  if (!response.ok) {
+    throw new Error(`Brevo API error (${response.status}): ${responseBody}`);
   }
-  return transporterPromise;
+
+  const { messageId } = JSON.parse(responseBody) as { messageId?: string };
+  console.log(`Brevo accepted email for ${toEmail}. Message ID: ${messageId || 'not returned'}`);
 };
 
-export const verifyEmailConnection = async (): Promise<void> => {
-  getMailConfig();
-  const transporter = await getTransporter();
-  await transporter.verify();
-};
+// Compatibility wrapper for the existing client-notification helpers below.
+// All emails still use the Brevo HTTPS API; no SMTP connection is made.
+const getTransporter = async () => ({
+  sendMail: async (mail: { to: string; subject: string; html: string }) =>
+    sendTransactionalEmail(mail.to, mail.subject, mail.html, 'TaxFollow CA Portal'),
+});
 
 // 1. Password Reset / Registration OTP Email
 export const sendOtpEmail = async (toEmail: string, otp: string): Promise<void> => {
   if (!toEmail) return;
-  getMailConfig();
-  const transporter = await getTransporter();
 
-  const mailOptions = {
-    from: `"TaxFollow Security" <${emailUser}>`,
-    to: toEmail,
-    subject: `Your TaxFollow Verification OTP`,
-    html: `
+  const html = `
       <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
         <h2 style="color: #059669; text-align: center;">TaxFollow Security</h2>
         <p style="color: #475569; font-size: 14px;">Aapka verification / password reset OTP code neeche diya gaya hai:</p>
@@ -67,12 +69,10 @@ export const sendOtpEmail = async (toEmail: string, otp: string): Promise<void> 
         </div>
         <p style="color: #64748b; font-size: 12px;">Yeh code 10 minute ke liye valid hai. Kripya ise kisi ke sath share na karein.</p>
       </div>
-    `,
-  };
+    `;
 
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`OTP email accepted by Gmail for ${toEmail}. Message ID: ${info.messageId}`);
+    await sendTransactionalEmail(toEmail, 'Your TaxFollow Verification OTP', html, 'TaxFollow Security');
   } catch (error: any) {
     console.error('OTP email delivery failed:', error?.message || error);
     throw new Error('Unable to send the OTP email. Please try again later.');

@@ -1,31 +1,10 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-// Secure SMTP Transporter Configuration
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true, // Port 465 ke liye SSL enable
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false
-  }
-});
+import { sendTransactionalEmail } from './sendEmail';
 
 // 1. Password Reset / OTP Email
 export const sendOtpEmail = async (toEmail: string, otp: string) => {
   if (!toEmail) return;
 
-  const mailOptions = {
-    from: `"TaxFollow Security" <${process.env.EMAIL_USER}>`,
-    to: toEmail,
-    subject: `Your Password Reset OTP - TaxFollow`,
-    html: `
+  const html = `
       <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
         <h2 style="color: #059669;">TaxFollow Password Reset</h2>
         <p style="color: #475569; font-size: 14px;">Aapka password reset OTP code neeche diya gaya hai:</p>
@@ -34,12 +13,10 @@ export const sendOtpEmail = async (toEmail: string, otp: string) => {
         </div>
         <p style="color: #64748b; font-size: 12px;">Yeh code 10 minute ke liye valid hai. Kisi ke sath share na karein.</p>
       </div>
-    `,
-  };
+    `;
 
   try {
-    await transporter.sendMail(mailOptions);
-    console.log(`OTP email sent successfully to ${toEmail}`);
+    await sendTransactionalEmail(toEmail, 'Your Password Reset OTP - TaxFollow', html, 'TaxFollow Security');
   } catch (err) {
     console.error('Failed to send OTP email:', err);
     throw err;
@@ -60,11 +37,7 @@ export const sendClientWelcomeEmail = async (
     ? `<ul>${requiredServices.map((s) => `<li><strong>${s}</strong></li>`).join('')}</ul>`
     : '<p>Standard verification documents required.</p>';
 
-  const mailOptions = {
-    from: `"TaxFollow CA Portal" <${process.env.EMAIL_USER}>`,
-    to: toEmail,
-    subject: `Document Request & Tax Filing Tracker - ${panNumber}`,
-    html: `
+  const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
         <h2 style="color: #059669; margin-bottom: 8px;">Namaste ${clientName},</h2>
         <p style="color: #475569; font-size: 14px;">
@@ -88,11 +61,10 @@ export const sendClientWelcomeEmail = async (
           <a href="${trackingUrl}" style="color: #059669;">${trackingUrl}</a>
         </p>
       </div>
-    `,
-  };
+    `;
 
   try {
-    await transporter.sendMail(mailOptions);
+    await sendTransactionalEmail(toEmail, `Document Request & Tax Filing Tracker - ${panNumber}`, html, 'TaxFollow CA Portal');
     console.log(`Welcome email sent to ${toEmail}`);
   } catch (err) {
     console.error('Failed to send welcome email:', err);
@@ -124,11 +96,7 @@ export const sendFinalAckEmail = async (
     ? 'TDS Filing Receipt' 
     : 'ITR-V Acknowledgement Receipt';
 
-  const mailOptions = {
-    from: `"TaxFollow CA Portal" <${process.env.EMAIL_USER}>`,
-    to: toEmail,
-    subject: `${title} (${panNumber})`,
-    html: `
+  const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
         <h2 style="color: #059669; margin-bottom: 8px;">${title}</h2>
         <p style="color: #475569; font-size: 14px;">
@@ -149,11 +117,10 @@ export const sendFinalAckEmail = async (
           PAN: <strong>${panNumber}</strong>
         </p>
       </div>
-    `,
-  };
+    `;
 
   try {
-    await transporter.sendMail(mailOptions);
+    await sendTransactionalEmail(toEmail, `${title} (${panNumber})`, html, 'TaxFollow CA Portal');
     console.log(`Final Ack email sent to ${toEmail}`);
   } catch (err) {
     console.error('Failed to send final ack email:', err);
