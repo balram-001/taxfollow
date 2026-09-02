@@ -20,7 +20,7 @@ export const sendTransactionalEmail = async (
   subject: string,
   htmlContent: string,
   senderName: string,
-  attachment?: { name: string; content: string }
+  attachments?: { name: string; content: string }[]
 ): Promise<void> => {
   const { senderEmail, apiKey } = getEmailConfig();
 
@@ -36,7 +36,7 @@ export const sendTransactionalEmail = async (
       to: [{ email: toEmail }],
       subject,
       htmlContent,
-      ...(attachment ? { attachment: [attachment] } : {}),
+      ...(attachments?.length ? { attachment: attachments } : {}),
     }),
   });
 

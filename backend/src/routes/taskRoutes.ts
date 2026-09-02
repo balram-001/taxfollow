@@ -32,7 +32,7 @@ router.delete('/upload/:token/file/:taskId/:fileIndex', deleteClientDocumentFile
 router.get('/download/:token/:taskId/:fileIndex', downloadClientFile);
 
 // CA Dashboard Routes
-router.post('/ca-upload-ack/:clientId', protect, upload.single('file'), uploadFinalAcknowledgement);
+router.post('/ca-upload-ack/:clientId', protect, upload.array('files', 10), uploadFinalAcknowledgement);
 router.put('/:id', protect, updateTaskStatus);
 
 export default router;

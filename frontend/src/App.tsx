@@ -36,7 +36,7 @@ function Dashboard() {
   const [activeClient, setActiveClient] = useState<any>(null);
   const [clientTasks, setClientTasks] = useState<any[]>([]);
   const [loadingTasks, setLoadingTasks] = useState(false);
-  const [ackFile, setAckFile] = useState<File | null>(null);
+  const [ackFiles, setAckFiles] = useState<File[]>([]);
   const [uploadingAck, setUploadingAck] = useState(false);
   const [isReplacingAck, setIsReplacingAck] = useState(false);
 
@@ -149,7 +149,7 @@ function Dashboard() {
     setActiveClient(client);
     setLoadingTasks(true);
     setIsReplacingAck(false);
-    setAckFile(null);
+    setAckFiles([]);
     try {
       const res = await API.get(`/tasks/public/${client.trackingToken}`);
       setClientTasks(res.data.tasks || []);
@@ -192,10 +192,10 @@ function Dashboard() {
 
   const handleUploadAck = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!ackFile || !activeClient) return;
+    if (ackFiles.length === 0 || !activeClient) return;
 
     const data = new FormData();
-    data.append('file', ackFile);
+    ackFiles.forEach((file) => data.append('files', file));
 
     setUploadingAck(true);
     try {
@@ -203,7 +203,7 @@ function Dashboard() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       showToast('Final ITR-V acknowledgement uploaded successfully.', 'success');
-      setAckFile(null);
+      setAckFiles([]);
       setIsReplacingAck(false);
       const res = await API.get(`/tasks/public/${activeClient.trackingToken}`);
       setClientTasks(res.data.tasks || []);
@@ -275,7 +275,8 @@ function Dashboard() {
   const ackTask = clientTasks.find(
     (t) => t.title === 'Acknowledgement Generated' || t.documentType === 'ITR Acknowledgement'
   );
-  const ackFileItem = ackTask?.files?.[0];
+  const ackFilesList = ackTask?.files || [];
+  const ackFileItem = ackFilesList[0];
 
   if (pageLoading) {
     return (
@@ -478,24 +479,26 @@ function Dashboard() {
 
               {ackFileItem?.fileUrl && !isReplacingAck ? (
                 <div className="space-y-2.5">
-                  <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-emerald-100">
+                    {ackFilesList.map((file: any, index: number) => (
+                      <div key={`${file.fileUrl}-${index}`} className="flex items-center justify-between bg-white p-3 rounded-lg border border-emerald-100">
                     <div className="flex items-center gap-2 truncate">
                       <FileText size={20} className="text-emerald-600 shrink-0" />
                       <div className="truncate">
-                        <p className="text-xs font-semibold text-slate-800 truncate">{ackFileItem.originalFileName || 'Final_Deliverable.pdf'}</p>
+                        <p className="text-xs font-semibold text-slate-800 truncate">{file.originalFileName || 'Final_Deliverable.pdf'}</p>
                         <p className="text-[10px] text-slate-400">Available on client portal for download</p>
                       </div>
                     </div>
                     <button
                       onClick={() => {
-                        setPreviewDocUrl(`${BACKEND_URL}${ackFileItem.fileUrl}`);
-                        setPreviewDocName(ackFileItem.originalFileName || 'Deliverable');
+                        setPreviewDocUrl(`${BACKEND_URL}${file.fileUrl}`);
+                        setPreviewDocName(file.originalFileName || 'Deliverable');
                       }}
                       className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold shrink-0 cursor-pointer"
                     >
                       View
                     </button>
-                  </div>
+                      </div>
+                    ))}
 
                   {/* Direct WhatsApp Share Button */}
                   <button
@@ -510,23 +513,24 @@ function Dashboard() {
                 <form onSubmit={handleUploadAck} className="space-y-2.5">
                   <p className="text-slate-600 text-[11px]">
                     {isReplacingAck 
-                      ? 'Upload the corrected PDF deliverable. The old file will be replaced.'
-                      : 'Upload the final acknowledgement/receipt PDF. This will mark all workflow stages as complete.'}
+                      ? 'Select corrected final documents. They will replace the old files.'
+                      : 'Select one or more final acknowledgement/receipt documents. This will mark all workflow stages as complete.'}
                   </p>
                   <div className="flex gap-2">
                     <input
                       type="file"
                       required
+                      multiple
                       accept=".pdf,.png,.jpg,.jpeg"
-                      onChange={(e) => setAckFile(e.target.files ? e.target.files[0] : null)}
+                      onChange={(e) => setAckFiles(Array.from(e.target.files || []))}
                       className="w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-white file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer border border-emerald-200 rounded-lg p-1 bg-white"
                     />
                     <button
                       type="submit"
-                      disabled={uploadingAck || !ackFile}
+                      disabled={uploadingAck || ackFiles.length === 0}
                       className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white font-semibold rounded-lg text-xs whitespace-nowrap cursor-pointer transition shadow-xs flex items-center gap-1.5"
                     >
-                      {uploadingAck ? <Loader2 className="animate-spin" size={14} /> : isReplacingAck ? 'Overwrite' : 'Upload & Finish'}
+                      {uploadingAck ? <Loader2 className="animate-spin" size={14} /> : isReplacingAck ? 'Replace Files' : 'Upload & Finish'}
                     </button>
                   </div>
                   {isReplacingAck && (
@@ -1072,13 +1076,16 @@ const allRequirementSlots = [
       </div>
       <p className="text-xs text-emerald-100">{bannerDesc}</p>
       <div className="flex flex-wrap gap-2 pt-1">
-        <a
-          href={`${BACKEND_URL}/api/tasks/download/${token}/${finalAckTask._id}/0`}
-          download={ackFileItem.originalFileName || 'Final_Document.pdf'}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-white text-emerald-800 font-bold text-xs rounded-xl shadow-sm hover:bg-emerald-50 transition cursor-pointer"
-        >
-          <Download size={15} /> {btnLabel}
-        </a>
+        {(finalAckTask.files || []).map((file: any, index: number) => (
+          <a
+            key={`${file.fileUrl}-${index}`}
+            href={`${BACKEND_URL}/api/tasks/download/${token}/${finalAckTask._id}/${index}`}
+            download={file.originalFileName || 'Final_Document.pdf'}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white text-emerald-800 font-bold text-xs rounded-xl shadow-sm hover:bg-emerald-50 transition cursor-pointer"
+          >
+            <Download size={15} /> {(finalAckTask.files || []).length > 1 ? `Download File ${index + 1}` : btnLabel}
+          </a>
+        ))}
         <button
           onClick={() => {
             setPreviewTargetDoc(ackFileItem);

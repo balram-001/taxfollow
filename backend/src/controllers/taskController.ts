@@ -255,10 +255,10 @@ export const deleteClientDocumentFile = async (req: Request, res: Response): Pro
 export const uploadFinalAcknowledgement = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { clientId } = req.params;
-    const file = req.file;
+    const files = (req.files as Express.Multer.File[] | undefined) || [];
 
-    if (!file) {
-      res.status(400).json({ message: 'No file uploaded' });
+    if (files.length === 0) {
+      res.status(400).json({ message: 'Select at least one final document.' });
       return;
     }
 
@@ -268,7 +268,11 @@ export const uploadFinalAcknowledgement = async (req: AuthRequest, res: Response
       return;
     }
 
-    const fileUrl = `/uploads/${file.filename}`;
+    const uploadedFiles = files.map((file) => ({
+      fileUrl: `/uploads/${file.filename}`,
+      originalFileName: file.originalname,
+      uploadedAt: new Date(),
+    }));
 
     // Update or Create Final Acknowledgement Task
     let ackTask = await DocumentTask.findOne({
@@ -286,11 +290,11 @@ export const uploadFinalAcknowledgement = async (req: AuthRequest, res: Response
         token: client.trackingToken,
         status: 'Completed',
         remarks: 'Final ITR-V Generated & Ready for Download',
-        files: [{ fileUrl, originalFileName: file.originalname, uploadedAt: new Date() }],
+        files: uploadedFiles,
       });
     } else {
       ackTask.status = 'Completed';
-      ackTask.files = [{ fileUrl, originalFileName: file.originalname, uploadedAt: new Date() }];
+      ackTask.files = uploadedFiles;
       await ackTask.save();
     }
 
@@ -306,7 +310,10 @@ export const uploadFinalAcknowledgement = async (req: AuthRequest, res: Response
       const backendBaseUrl = process.env.PUBLIC_BACKEND_URL || 'https://taxfollow-backend.onrender.com';
       const trackingUrl = `${frontendBaseUrl}/track/${client.trackingToken}`;
       const downloadUrl = `${backendBaseUrl}/api/tasks/download/${client.trackingToken}/${ackTask._id}/0`;
-      const attachmentContent = fs.readFileSync(file.path).toString('base64');
+      const attachments = files.map((file) => ({
+        name: file.originalname,
+        content: fs.readFileSync(file.path).toString('base64'),
+      }));
 
       // Await sending so every replacement creates a fresh notification. The
       // actual file content is attached instead of relying on Brevo fetching a URL.
@@ -317,8 +324,7 @@ export const uploadFinalAcknowledgement = async (req: AuthRequest, res: Response
         trackingUrl,
         client.serviceType,
         downloadUrl,
-        file.originalname,
-        attachmentContent
+        attachments
       );
     }
 

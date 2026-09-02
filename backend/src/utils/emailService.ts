@@ -79,8 +79,7 @@ export const sendFinalAckEmail = async (
   trackingUrl: string,
   serviceType?: string,
   downloadUrl?: string,
-  fileName?: string,
-  attachmentContent?: string
+  attachments?: { name: string; content: string }[]
 ) => {
   if (!toEmail) return;
 
@@ -130,7 +129,7 @@ export const sendFinalAckEmail = async (
       `${title} (${panNumber})`,
       html,
       'TaxFollow CA Portal',
-      fileName && attachmentContent ? { name: fileName, content: attachmentContent } : undefined
+      attachments
     );
     console.log(`Final Ack email sent to ${toEmail}`);
   } catch (err) {
