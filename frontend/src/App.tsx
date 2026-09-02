@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import { BACKEND_URL } from './config';
+import { useToast } from './toast';
 import { 
   Shield, Plus, Search, ExternalLink, X, LogOut, 
   MessageCircle, Copy, Check, Loader2, Upload, FileText, SlidersHorizontal,
@@ -19,6 +20,7 @@ const AVAILABLE_SERVICES = [
 ];
 
 function Dashboard() {
+  const { showToast } = useToast();
   const [clients, setClients] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -123,7 +125,7 @@ function Dashboard() {
       setCustomReqs([]);
       fetchClients();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Error creating client');
+      showToast(err.response?.data?.message || 'We could not create this client. Please check the details and try again.', 'error');
     } finally {
       setSavingClient(false);
     }
@@ -137,7 +139,7 @@ function Dashboard() {
       setClients((prev) => prev.filter((c) => c._id !== clientToDelete._id));
       setClientToDelete(null);
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to delete client');
+      showToast(err.response?.data?.message || 'We could not delete this client. Please try again.', 'error');
     } finally {
       setDeleting(false);
     }
@@ -184,7 +186,7 @@ function Dashboard() {
         }));
       }
     } catch (err) {
-      alert('Failed to update stage status');
+      showToast('We could not update the stage status. Please try again.', 'error');
     }
   };
 
@@ -200,13 +202,13 @@ function Dashboard() {
       await API.post(`/tasks/ca-upload-ack/${activeClient._id}`, data, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      alert('Final ITR-V Acknowledgement uploaded successfully!');
+      showToast('Final ITR-V acknowledgement uploaded successfully.', 'success');
       setAckFile(null);
       setIsReplacingAck(false);
       const res = await API.get(`/tasks/public/${activeClient.trackingToken}`);
       setClientTasks(res.data.tasks || []);
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to upload ITR-V');
+      showToast(err.response?.data?.message || 'We could not upload the acknowledgement. Please try again.', 'error');
     } finally {
       setUploadingAck(false);
     }
@@ -904,6 +906,7 @@ function Dashboard() {
 }
 
 function ClientTracker() {
+  const { showToast } = useToast();
   const { token } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState<any>(null);
@@ -949,7 +952,7 @@ function ClientTracker() {
       });
       await fetchStatus();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Upload failed');
+      showToast(err.response?.data?.error || 'Upload failed. Please try again.', 'error');
     } finally {
       setUploadingStatus(null);
     }
@@ -960,7 +963,7 @@ function ClientTracker() {
       await API.delete(`/tasks/upload/${token}/file/${taskId}/${fileIndex}`);
       await fetchStatus();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to delete file');
+      showToast('That document is no longer available. Refresh the page and try again.', 'error');
     }
   };
 
