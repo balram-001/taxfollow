@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { Client } from '../models/Client';
 import { DocumentTask } from '../models/DocumentTask';
 import { AuthRequest } from '../middleware/authMiddleware';
+import { sendClientWelcomeEmail } from '../utils/emailService';
 
 export const createClient = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -34,6 +35,24 @@ export const createClient = async (req: AuthRequest, res: Response): Promise<voi
       userId: userId,
       trackingToken,
     });
+
+    // Send the client their upload and tracking link after the client record is saved.
+    if (email) {
+      const frontendBaseUrl = process.env.CLIENT_BASE_URL || 'https://taxfollow.vercel.app';
+      const trackingUrl = `${frontendBaseUrl}/track/${trackingToken}`;
+      const requirements = [
+        ...(serviceType ? serviceType.split(', ').filter(Boolean) : []),
+        ...(Array.isArray(customRequirements) ? customRequirements.map((requirement: any) => requirement.name) : []),
+      ];
+
+      void sendClientWelcomeEmail(
+        email,
+        name,
+        panNumber.toUpperCase().trim(),
+        trackingUrl,
+        requirements
+      ).catch((err) => console.error('Background welcome email error:', err));
+    }
 
     res.status(201).json(client);
   } catch (error: any) {
