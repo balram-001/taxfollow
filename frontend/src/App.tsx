@@ -240,16 +240,16 @@ function Dashboard() {
     const customList = Array.isArray(client.customRequirements) ? client.customRequirements.map((r: any) => r.name) : [];
     const allRequired = [...standardServices, ...customList];
 
-    let message = `Namaste ${client.name},\n\n`;
+    let message = `*TaxFollow CA Portal*\n\nNamaste ${client.name},\n\n`;
 
     if (allRequired.length > 0) {
-      message += `Aapke compliance work ke liye neeche diye gaye documents pending hain:\n`;
+      message += `Aapke compliance work ke liye following documents required hain:\n`;
       allRequired.forEach((req) => {
         message += `• ${req}\n`;
       });
-      message += `\nKripya is link par click karke documents upload karein:\n${trackingUrl}\n\n- TaxFollow CA Office`;
+      message += `\n*Upload Documents / View Status*\n${trackingUrl}\n\nKripya secure portal open karke documents upload karein.\n\n— TaxFollow CA Office`;
     } else {
-      message += `Aapka filing tracking portal ready hai.\n\nKripya is link par click karke status track karein:\n${trackingUrl}\n\n- TaxFollow CA Office`;
+      message += `Aapka filing portal ready hai.\n\n*Open Client Portal*\n${trackingUrl}\n\nYahan aap filing status aur documents dekh sakte hain.\n\n— TaxFollow CA Office`;
     }
 
     window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`, '_blank');
@@ -270,7 +270,7 @@ function Dashboard() {
       ? 'ITR-V Acknowledgement Receipt'
       : 'Final Compliance Receipt';
 
-    const message = `Namaste ${client.name},\n\nAapka compliance work successfully complete ho gaya hai! 🎉\n\nAapki official *${docName}* portal par download ke liye uplabdh hai.\n\n🔗 *Download Receipt & View Completed Dashboard:*\n${trackingUrl}\n\n- TaxFollow CA Office`;
+    const message = `*TaxFollow CA Portal*\n\nNamaste ${client.name},\n\nAapka compliance work successfully complete ho gaya hai. ✅\n\nAapki official *${docName}* secure portal par available hai.\n\n*Download Document / Track Filing*\n${trackingUrl}\n\n— TaxFollow CA Office`;
 
     window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
