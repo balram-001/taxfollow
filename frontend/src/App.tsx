@@ -835,7 +835,7 @@ function Dashboard() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Email</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Email <span className="text-slate-400 font-normal">(Optional)</span></label>
                   <input
                     type="email"
                     value={formData.email}
@@ -843,6 +843,7 @@ function Dashboard() {
                     className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 text-sm"
                     placeholder="client@mail.com"
                   />
+                  <p className="mt-1 text-[10px] text-slate-400">Required only for email notifications and document delivery.</p>
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-700 mb-1">WhatsApp / Phone</label>
