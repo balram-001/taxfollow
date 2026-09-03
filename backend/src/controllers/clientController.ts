@@ -2,6 +2,7 @@ import { Response } from 'express';
 import crypto from 'crypto';
 import { Client } from '../models/Client';
 import { DocumentTask } from '../models/DocumentTask';
+import { User } from '../models/User';
 import { AuthRequest } from '../middleware/authMiddleware';
 import { sendClientWelcomeEmail } from '../utils/emailService';
 
@@ -44,13 +45,15 @@ export const createClient = async (req: AuthRequest, res: Response): Promise<voi
         ...(serviceType ? serviceType.split(', ').filter(Boolean) : []),
         ...(Array.isArray(customRequirements) ? customRequirements.map((requirement: any) => requirement.name) : []),
       ];
+      const ca = await User.findById(userId).select('name').lean();
 
       void sendClientWelcomeEmail(
         email,
         name,
         panNumber.toUpperCase().trim(),
         trackingUrl,
-        requirements
+        requirements,
+        ca?.name
       ).catch((err) => console.error('Background welcome email error:', err));
     }
 

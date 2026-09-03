@@ -66,11 +66,11 @@ export const sendOtpEmail = async (toEmail: string, otp: string): Promise<void> 
   const html = `
       <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
         <h2 style="color: #059669; text-align: center;">TaxFollow Security</h2>
-        <p style="color: #475569; font-size: 14px;">Aapka verification / password reset OTP code neeche diya gaya hai:</p>
+        <p style="color: #475569; font-size: 14px;">Use the verification or password-reset OTP below:</p>
         <div style="background-color: #f1f5f9; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0;">
           <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #0f172a;">${otp}</span>
         </div>
-        <p style="color: #64748b; font-size: 12px;">Yeh code 10 minute ke liye valid hai. Kripya ise kisi ke sath share na karein.</p>
+        <p style="color: #64748b; font-size: 12px;">This code expires in 10 minutes. Do not share it with anyone.</p>
       </div>
     `;
 
@@ -103,9 +103,9 @@ export const sendClientWelcomeEmail = async (
     subject: `Document Request & Tax Filing Tracker - ${panNumber}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
-        <h2 style="color: #059669; margin-bottom: 8px;">Namaste ${clientName},</h2>
+        <h2 style="color: #059669; margin-bottom: 8px;">Welcome, ${clientName}</h2>
         <p style="color: #475569; font-size: 14px;">
-          Aapke tax compliance aur filing ke liye portal ready hai. Kripya neeche diye gaye link par click karke maange gaye documents upload karein:
+          Your secure portal is ready. Please upload the requested documents and track your filing progress.
         </p>
 
         <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -121,7 +121,7 @@ export const sendClientWelcomeEmail = async (
         </div>
 
         <p style="color: #94a3b8; font-size: 12px; margin-top: 20px;">
-          Agar link click na ho toh ise browser me copy-paste karein:<br/>
+          If the button does not open, copy and paste this link into your browser:<br/>
           <a href="${trackingUrl}" style="color: #059669;">${trackingUrl}</a>
         </p>
       </div>
@@ -170,11 +170,11 @@ export const sendFinalAckEmail = async (
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
         <h2 style="color: #059669; margin-bottom: 8px;">${title}</h2>
         <p style="color: #475569; font-size: 14px;">
-          Namaste ${clientName}, aapka work successfully complete kar diya gaya hai.
+          Hello ${clientName}, your compliance work has been completed successfully.
         </p>
 
         <p style="color: #475569; font-size: 14px;">
-          Aapki official <strong>${docName}</strong> portal par download ke liye uplabdh hai:
+          Your official <strong>${docName}</strong> is available to download from the client portal:
         </p>
 
         <div style="text-align: center; margin: 25px 0;">

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { DocumentTask } from '../models/DocumentTask';
 import { Client } from '../models/Client';
+import { User } from '../models/User';
 import { AuthRequest } from '../middleware/authMiddleware';
 import fs from 'fs';
 import path from 'path';
@@ -325,6 +326,7 @@ export const uploadFinalAcknowledgement = async (req: AuthRequest, res: Response
             name: file.originalname,
             content: fs.readFileSync(file.path).toString('base64'),
           }));
+          const ca = await User.findById(client.userId).select('name').lean();
           await sendFinalAckEmail(
             client.email!,
             client.name,
@@ -333,7 +335,8 @@ export const uploadFinalAcknowledgement = async (req: AuthRequest, res: Response
             client.serviceType,
             downloadUrl,
             attachments,
-            isReplacement
+            isReplacement,
+            ca?.name
           );
           console.log(`Final delivery email v${ackTask.finalDeliveryVersion} sent for client ${client._id}.`);
         } catch (emailError) {

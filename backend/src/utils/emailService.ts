@@ -7,11 +7,11 @@ export const sendOtpEmail = async (toEmail: string, otp: string) => {
   const html = `
       <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
         <h2 style="color: #059669;">TaxFollow Password Reset</h2>
-        <p style="color: #475569; font-size: 14px;">Aapka password reset OTP code neeche diya gaya hai:</p>
+        <p style="color: #475569; font-size: 14px;">Use the password-reset OTP below:</p>
         <div style="background-color: #f1f5f9; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0;">
           <span style="font-size: 28px; font-weight: bold; letter-spacing: 6px; color: #0f172a;">${otp}</span>
         </div>
-        <p style="color: #64748b; font-size: 12px;">Yeh code 10 minute ke liye valid hai. Kisi ke sath share na karein.</p>
+        <p style="color: #64748b; font-size: 12px;">This code expires in 10 minutes. Do not share it with anyone.</p>
       </div>
     `;
 
@@ -29,7 +29,8 @@ export const sendClientWelcomeEmail = async (
   clientName: string,
   panNumber: string,
   trackingUrl: string,
-  requiredServices: string[]
+  requiredServices: string[],
+  caName?: string
 ) => {
   if (!toEmail) return;
 
@@ -39,9 +40,9 @@ export const sendClientWelcomeEmail = async (
 
   const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
-        <h2 style="color: #059669; margin-bottom: 8px;">Namaste ${clientName},</h2>
+        <h2 style="color: #059669; margin-bottom: 8px;">Welcome, ${clientName}</h2>
         <p style="color: #475569; font-size: 14px;">
-          Aapke tax compliance aur filing ke liye portal ready hai. Kripya neeche diye gaye link par click karke maange gaye documents upload karein:
+          Your secure TaxFollow portal is ready. Please use it to upload the requested documents and track your filing progress.
         </p>
 
         <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -57,14 +58,15 @@ export const sendClientWelcomeEmail = async (
         </div>
 
         <p style="color: #94a3b8; font-size: 12px; margin-top: 20px;">
-          Agar link click na ho toh ise browser me copy-paste karein:<br/>
+          If the button does not open, copy and paste this link into your browser:<br/>
           <a href="${trackingUrl}" style="color: #059669;">${trackingUrl}</a>
         </p>
+        <p style="color: #475569; font-size: 13px;">Regards,<br/><strong>${caName || 'Your CA'}</strong><br/>TaxFollow CA Portal</p>
       </div>
     `;
 
   try {
-    await sendTransactionalEmail(toEmail, `Document Request & Tax Filing Tracker - ${panNumber}`, html, 'TaxFollow CA Portal');
+    await sendTransactionalEmail(toEmail, `Document Request & Tax Filing Tracker - ${panNumber}`, html, `${caName || 'TaxFollow'} | CA Portal`);
     console.log(`Welcome email sent to ${toEmail}`);
   } catch (err) {
     console.error('Failed to send welcome email:', err);
@@ -80,7 +82,8 @@ export const sendFinalAckEmail = async (
   serviceType?: string,
   downloadUrl?: string,
   attachments?: { name: string; content: string }[],
-  isReplacement = false
+  isReplacement = false,
+  caName?: string
 ) => {
   if (!toEmail) return;
 
@@ -104,11 +107,11 @@ export const sendFinalAckEmail = async (
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
         <h2 style="color: #059669; margin-bottom: 8px;">${emailTitle}</h2>
         <p style="color: #475569; font-size: 14px;">
-          Namaste ${clientName}, ${isReplacement ? 'aapka updated final document upload kar diya gaya hai.' : 'aapka work successfully complete kar diya gaya hai.'}
+          Hello ${clientName}, ${isReplacement ? 'your updated final document is now available.' : 'your compliance work has been completed successfully.'}
         </p>
 
         <p style="color: #475569; font-size: 14px;">
-          Aapki official <strong>${docName}</strong> is email ke saath attach ki gayi hai. Aap ise email attachment se seedha download kar sakte hain.
+          Your official <strong>${docName}</strong> is attached to this email and is also available through the secure client portal.
         </p>
 
         <div style="text-align: center; margin: 25px 0;">
@@ -120,11 +123,12 @@ export const sendFinalAckEmail = async (
           </a>
         </div>
 
-        <p style="color: #64748b; font-size: 12px;">Agar button click na ho, client portal open karein: <a href="${trackingUrl}" style="color: #059669;">${trackingUrl}</a></p>
+        <p style="color: #64748b; font-size: 12px;">If a button does not open, use the client portal: <a href="${trackingUrl}" style="color: #059669;">${trackingUrl}</a></p>
 
         <p style="color: #64748b; font-size: 12px;">
           PAN: <strong>${panNumber}</strong>
         </p>
+        <p style="color: #475569; font-size: 13px;">Regards,<br/><strong>${caName || 'Your CA'}</strong><br/>TaxFollow CA Portal</p>
       </div>
     `;
 
@@ -133,7 +137,7 @@ export const sendFinalAckEmail = async (
       toEmail,
       `${emailTitle} (${panNumber}) - ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`,
       html,
-      'TaxFollow CA Portal',
+      `${caName || 'TaxFollow'} | CA Portal`,
       attachments
     );
     console.log(`Final Ack email sent to ${toEmail}`);
@@ -146,7 +150,7 @@ export const sendFinalAckEmail = async (
         toEmail,
         `${emailTitle} (${panNumber}) - ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`,
         html,
-        'TaxFollow CA Portal'
+        `${caName || 'TaxFollow'} | CA Portal`
       );
       console.log(`Final Ack fallback notification sent to ${toEmail}`);
     } catch (notificationError) {

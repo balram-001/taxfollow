@@ -21,6 +21,13 @@ const AVAILABLE_SERVICES = [
 
 function Dashboard() {
   const { showToast } = useToast();
+  const caName = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('user') || '{}').name || 'Your CA';
+    } catch {
+      return 'Your CA';
+    }
+  })();
   const [clients, setClients] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -240,16 +247,16 @@ function Dashboard() {
     const customList = Array.isArray(client.customRequirements) ? client.customRequirements.map((r: any) => r.name) : [];
     const allRequired = [...standardServices, ...customList];
 
-    let message = `*TaxFollow CA Portal*\n\nNamaste ${client.name},\n\n`;
+    let message = `*TaxFollow CA Portal*\n\nHello ${client.name},\n\n`;
 
     if (allRequired.length > 0) {
-      message += `Aapke compliance work ke liye following documents required hain:\n`;
+      message += `The following documents are required for your compliance work:\n`;
       allRequired.forEach((req) => {
         message += `• ${req}\n`;
       });
-      message += `\n*Upload Documents / View Status*\n${trackingUrl}\n\nKripya secure portal open karke documents upload karein.\n\n— TaxFollow CA Office`;
+      message += `\n*Upload Documents / View Status*\n${trackingUrl}\n\nPlease open the secure portal to upload your documents.\n\nRegards,\n${caName}\nTaxFollow CA Portal`;
     } else {
-      message += `Aapka filing portal ready hai.\n\n*Open Client Portal*\n${trackingUrl}\n\nYahan aap filing status aur documents dekh sakte hain.\n\n— TaxFollow CA Office`;
+      message += `Your filing portal is ready.\n\n*Open Client Portal*\n${trackingUrl}\n\nYou can view your filing status and documents there.\n\nRegards,\n${caName}\nTaxFollow CA Portal`;
     }
 
     window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`, '_blank');
@@ -270,7 +277,7 @@ function Dashboard() {
       ? 'ITR-V Acknowledgement Receipt'
       : 'Final Compliance Receipt';
 
-    const message = `*TaxFollow CA Portal*\n\nNamaste ${client.name},\n\nAapka compliance work successfully complete ho gaya hai. ✅\n\nAapki official *${docName}* secure portal par available hai.\n\n*Download Document / Track Filing*\n${trackingUrl}\n\n— TaxFollow CA Office`;
+    const message = `*TaxFollow CA Portal*\n\nHello ${client.name},\n\nYour compliance work has been completed successfully. ✅\n\nYour official *${docName}* is available in the secure portal.\n\n*Download Document / Track Filing*\n${trackingUrl}\n\nRegards,\n${caName}\nTaxFollow CA Portal`;
 
     window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
@@ -889,7 +896,7 @@ function Dashboard() {
                   + Add Custom Document Requirements (Optional)
                 </label>
                 <p className="text-[11px] text-slate-500">
-                  Agar client se koi alag specific file mangwani ho (jaise Rent Agreement, Sale Deed, etc.):
+                  Add a specific document requirement when you need a file such as a Rent Agreement or Sale Deed:
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <input
@@ -1100,12 +1107,12 @@ const allRequirementSlots = [
     : 'Work Completed Successfully!';
 
   const bannerDesc = isGST
-    ? 'Aapka GST Return successfully file ho chuka hai. Official GSTR Acknowledgement neeche se download karein:'
+    ? 'Your GST Return has been filed successfully. Download your official GSTR acknowledgement below:'
     : isTDS
-    ? 'Aapka TDS compliance pura ho chuka hai. Official TDS Receipt neeche se download karein:'
+    ? 'Your TDS compliance has been completed. Download your official TDS receipt below:'
     : isITR
-    ? 'Aapka ITR successfully file ho chuka hai. Original ITR-V Acknowledgement Receipt neeche se download karein:'
-    : 'Aapka compliance work pura ho chuka hai. Verified final document neeche se download karein:';
+    ? 'Your ITR has been filed successfully. Download your original ITR-V acknowledgement receipt below:'
+    : 'Your compliance work has been completed. Download your verified final document below:';
 
   const btnLabel = isGST 
     ? 'Download GST Receipt' 
@@ -1153,7 +1160,7 @@ const allRequirementSlots = [
             <Upload size={16} className="text-emerald-600" /> Document Submissions
           </h2>
           <p className="text-slate-500 text-xs mt-1">
-            Neeche maange gaye sabhi documents select karke upload karein:
+            Select and upload all requested documents below:
           </p>
         </div>
 
