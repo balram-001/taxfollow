@@ -247,16 +247,16 @@ function Dashboard() {
     const customList = Array.isArray(client.customRequirements) ? client.customRequirements.map((r: any) => r.name) : [];
     const allRequired = [...standardServices, ...customList];
 
-    let message = `*TaxFollow CA Portal*\n\nHello ${client.name},\n\n`;
+    let message = `*TaxMeld CA Portal*\n\nHello ${client.name},\n\n`;
 
     if (allRequired.length > 0) {
       message += `The following documents are required for your compliance work:\n`;
       allRequired.forEach((req) => {
         message += `• ${req}\n`;
       });
-      message += `\n*Upload Documents / View Status*\n${trackingUrl}\n\nPlease open the secure portal to upload your documents.\n\nRegards,\n${caName}\nTaxFollow CA Portal`;
+      message += `\n*Upload Documents / View Status*\n${trackingUrl}\n\nPlease open the secure portal to upload your documents.\n\nRegards,\n${caName}\nTaxMeld CA Portal`;
     } else {
-      message += `Your filing portal is ready.\n\n*Open Client Portal*\n${trackingUrl}\n\nYou can view your filing status and documents there.\n\nRegards,\n${caName}\nTaxFollow CA Portal`;
+      message += `Your filing portal is ready.\n\n*Open Client Portal*\n${trackingUrl}\n\nYou can view your filing status and documents there.\n\nRegards,\n${caName}\nTaxMeld CA Portal`;
     }
 
     window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`, '_blank');
@@ -277,7 +277,7 @@ function Dashboard() {
       ? 'ITR-V Acknowledgement Receipt'
       : 'Final Compliance Receipt';
 
-    const message = `*TaxFollow CA Portal*\n\nHello ${client.name},\n\nYour compliance work has been completed successfully. ✅\n\nYour official *${docName}* is available in the secure portal.\n\n*Download Document / Track Filing*\n${trackingUrl}\n\nRegards,\n${caName}\nTaxFollow CA Portal`;
+    const message = `*TaxMeld CA Portal*\n\nHello ${client.name},\n\nYour compliance work has been completed successfully. ✅\n\nYour official *${docName}* is available in the secure portal.\n\n*Download Document / Track Filing*\n${trackingUrl}\n\nRegards,\n${caName}\nTaxMeld CA Portal`;
 
     window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
@@ -1396,7 +1396,7 @@ function NavigationBar({ isAuthenticated, onLogoutRequest }: { isAuthenticated: 
   return (
     <nav className="border-b border-slate-200 bg-white shadow-sm px-4 sm:px-8 py-3 flex justify-between items-center sticky top-0 z-40">
       <Link to="/" className="flex items-center gap-2 font-bold text-base sm:text-lg text-emerald-700">
-        <Shield size={20} className="text-emerald-600" /> TaxFollow
+        <Shield size={20} className="text-emerald-600" /> TaxMeld
       </Link>
       <div className="flex items-center gap-3">
         {isAuthenticated ? (

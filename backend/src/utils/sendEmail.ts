@@ -56,7 +56,7 @@ export const sendTransactionalEmail = async (
 // All emails still use the Brevo HTTPS API; no SMTP connection is made.
 const getTransporter = async () => ({
   sendMail: async (mail: { to: string; subject: string; html: string }) =>
-    sendTransactionalEmail(mail.to, mail.subject, mail.html, 'TaxFollow CA Portal'),
+    sendTransactionalEmail(mail.to, mail.subject, mail.html, 'TaxMeld CA Portal'),
 });
 
 // 1. Password Reset / Registration OTP Email
@@ -65,7 +65,7 @@ export const sendOtpEmail = async (toEmail: string, otp: string): Promise<void> 
 
   const html = `
       <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
-        <h2 style="color: #059669; text-align: center;">TaxFollow Security</h2>
+        <h2 style="color: #059669; text-align: center;">TaxMeld Security</h2>
         <p style="color: #475569; font-size: 14px;">Use the verification or password-reset OTP below:</p>
         <div style="background-color: #f1f5f9; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0;">
           <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #0f172a;">${otp}</span>
@@ -75,7 +75,7 @@ export const sendOtpEmail = async (toEmail: string, otp: string): Promise<void> 
     `;
 
   try {
-    await sendTransactionalEmail(toEmail, 'Your TaxFollow Verification OTP', html, 'TaxFollow Security');
+    await sendTransactionalEmail(toEmail, 'Your TaxMeld Verification OTP', html, 'TaxMeld Security');
   } catch (error: any) {
     console.error('OTP email delivery failed:', error?.message || error);
     throw new Error('Unable to send the OTP email. Please try again later.');
@@ -98,7 +98,7 @@ export const sendClientWelcomeEmail = async (
     : '<p>Standard verification documents required.</p>';
 
   const mailOptions = {
-    from: `"TaxFollow CA Portal" <${process.env.EMAIL_USER}>`,
+    from: `"TaxMeld CA Portal" <${process.env.EMAIL_USER}>`,
     to: toEmail,
     subject: `Document Request & Tax Filing Tracker - ${panNumber}`,
     html: `
@@ -163,7 +163,7 @@ export const sendFinalAckEmail = async (
     : 'ITR-V Acknowledgement Receipt';
 
   const mailOptions = {
-    from: `"TaxFollow CA Portal" <${process.env.EMAIL_USER}>`,
+    from: `"TaxMeld CA Portal" <${process.env.EMAIL_USER}>`,
     to: toEmail,
     subject: `${title} (${panNumber})`,
     html: `

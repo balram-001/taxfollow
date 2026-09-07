@@ -114,7 +114,7 @@ export default function Login({ onLogin }: LoginProps) {
         </form>
 
         <p className="text-center text-xs text-slate-500 mt-6 pt-4 border-t border-slate-100">
-          New to TaxFollow?{' '}
+          New to TaxMeld?{' '}
           <Link to="/register" className="text-emerald-700 hover:underline font-semibold">
             Create an Account
           </Link>

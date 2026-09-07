@@ -6,7 +6,7 @@ export const sendOtpEmail = async (toEmail: string, otp: string) => {
 
   const html = `
       <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
-        <h2 style="color: #059669;">TaxFollow Password Reset</h2>
+        <h2 style="color: #059669;">TaxMeld Password Reset</h2>
         <p style="color: #475569; font-size: 14px;">Use the password-reset OTP below:</p>
         <div style="background-color: #f1f5f9; padding: 15px; border-radius: 8px; text-align: center; margin: 20px 0;">
           <span style="font-size: 28px; font-weight: bold; letter-spacing: 6px; color: #0f172a;">${otp}</span>
@@ -16,7 +16,7 @@ export const sendOtpEmail = async (toEmail: string, otp: string) => {
     `;
 
   try {
-    await sendTransactionalEmail(toEmail, 'Your Password Reset OTP - TaxFollow', html, 'TaxFollow Security');
+    await sendTransactionalEmail(toEmail, 'Your Password Reset OTP - TaxMeld', html, 'TaxMeld Security');
   } catch (err) {
     console.error('Failed to send OTP email:', err);
     throw err;
@@ -42,7 +42,7 @@ export const sendClientWelcomeEmail = async (
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
         <h2 style="color: #059669; margin-bottom: 8px;">Welcome, ${clientName}</h2>
         <p style="color: #475569; font-size: 14px;">
-          Your secure TaxFollow portal is ready. Please use it to upload the requested documents and track your filing progress.
+          Your secure TaxMeld portal is ready. Please use it to upload the requested documents and track your filing progress.
         </p>
 
         <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -61,12 +61,12 @@ export const sendClientWelcomeEmail = async (
           If the button does not open, copy and paste this link into your browser:<br/>
           <a href="${trackingUrl}" style="color: #059669;">${trackingUrl}</a>
         </p>
-        <p style="color: #475569; font-size: 13px;">Regards,<br/><strong>${caName || 'Your CA'}</strong><br/>TaxFollow CA Portal</p>
+        <p style="color: #475569; font-size: 13px;">Regards,<br/><strong>${caName || 'Your CA'}</strong><br/>TaxMeld CA Portal</p>
       </div>
     `;
 
   try {
-    await sendTransactionalEmail(toEmail, `Document Request & Tax Filing Tracker - ${panNumber}`, html, `${caName || 'TaxFollow'} | CA Portal`);
+    await sendTransactionalEmail(toEmail, `Document Request & Tax Filing Tracker - ${panNumber}`, html, `${caName || 'TaxMeld'} | CA Portal`);
     console.log(`Welcome email sent to ${toEmail}`);
   } catch (err) {
     console.error('Failed to send welcome email:', err);
@@ -128,7 +128,7 @@ export const sendFinalAckEmail = async (
         <p style="color: #64748b; font-size: 12px;">
           PAN: <strong>${panNumber}</strong>
         </p>
-        <p style="color: #475569; font-size: 13px;">Regards,<br/><strong>${caName || 'Your CA'}</strong><br/>TaxFollow CA Portal</p>
+        <p style="color: #475569; font-size: 13px;">Regards,<br/><strong>${caName || 'Your CA'}</strong><br/>TaxMeld CA Portal</p>
       </div>
     `;
 
@@ -137,7 +137,7 @@ export const sendFinalAckEmail = async (
       toEmail,
       `${emailTitle} (${panNumber}) - ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`,
       html,
-      `${caName || 'TaxFollow'} | CA Portal`,
+      `${caName || 'TaxMeld'} | CA Portal`,
       attachments
     );
     console.log(`Final Ack email sent to ${toEmail}`);
@@ -150,7 +150,7 @@ export const sendFinalAckEmail = async (
         toEmail,
         `${emailTitle} (${panNumber}) - ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}`,
         html,
-        `${caName || 'TaxFollow'} | CA Portal`
+        `${caName || 'TaxMeld'} | CA Portal`
       );
       console.log(`Final Ack fallback notification sent to ${toEmail}`);
     } catch (notificationError) {
