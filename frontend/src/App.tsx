@@ -1395,8 +1395,8 @@ const allRequirementSlots = [
 function NavigationBar({ isAuthenticated, onLogoutRequest }: { isAuthenticated: boolean; onLogoutRequest: () => void }) {
   return (
     <nav className="border-b border-slate-200 bg-white shadow-sm px-4 sm:px-8 py-3 flex justify-between items-center sticky top-0 z-40">
-      <Link to="/" className="flex items-center gap-2 font-bold text-base sm:text-lg text-emerald-700">
-        <Shield size={20} className="text-emerald-600" /> TaxMeld
+      <Link to="/" className="flex items-center" aria-label="TaxMeld home">
+        <img src="/taxmeld-logo.png" alt="TaxMeld" className="h-9 sm:h-10 w-auto object-contain" />
       </Link>
       <div className="flex items-center gap-3">
         {isAuthenticated ? (
